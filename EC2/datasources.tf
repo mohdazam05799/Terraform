@@ -18,3 +18,8 @@ data "aws_ami" "ubuntu" {
       values = ["x86_64"]
     }
 }
+
+output "ami" {
+    value = data.aws_ami.ubuntu.id
+  
+}
