@@ -1,18 +1,18 @@
 variable "region" {
-    type = string
-  
+  type = string
+
 }
 variable "instance-type" {
-    type = string
-  
+  type = string
+
 }
 
 variable "environment" {
-    type = string
-  
+  type = string
+
 }
 
 variable "volume-size" {
-    type = number
-  
+  type = number
+
 }

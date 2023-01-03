@@ -1,3 +1,4 @@
 EC2/*.tfstate
 EC2/id_rsa.pub
 EC2/.terrafrom/*
+VPC/
