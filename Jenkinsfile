@@ -1,20 +1,18 @@
+def check_runs = new com.functions.buildGithubCheckScript()
+
 pipeline {
     agent any
     stages {
         stage('Build') {
             steps {
-                script {
-                    def check = buildGithubCheck name: 'Build', status: 'in_progress'
-                    try {
-                        echo 'make build'
-                        check = check.update(status: 'completed', conclusion: 'success', output: [title: 'Build', summary: 'Build successful'])
-                    } catch (e) {
-                        check = check.update(status: 'completed', conclusion: 'failure', output: [title: 'Error', summary: 'Error occurred during Build stage'])
-                        throw e
-                    } finally {
-                        env.CHECK_EXTERNAL_ID = 'Build'
-                        env.CHECK_CONCLUSION = check.conclusion
-                    }
+                script{
+                   try {
+                            build_command = sh(script: "pwd", returnStatus: true)
+                            check_runs.buildGithubCheck(<REPO_NAME>, <COMMIT_ID>, privateKey, 'success', "build")
+                        } catch(Exception e) {
+                            check_runs.buildGithubCheck(<REPO_NAME>, <COMMIT_ID>, privateKey, 'failure', "build")
+                            echo "Exception: ${e}"
+                        }
                 }
             }
         }
