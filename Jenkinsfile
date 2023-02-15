@@ -1,31 +1,38 @@
 pipeline {
     agent any
     stages {
-        stage('prepare') {
+        stage('Build') {
             steps {
-                script{
-                    env.CHECK_EXTERNAL_ID = 'prepare'}
-                
-                echo "This is the prepare stage"
-                
+                // Define the context for the status check
+                script {
+                    env.GITHUB_STATUS_CONTEXT = 'build'
+                }
+                // Run the build steps
+                echo 'make build'
             }
         }
-        stage('build') {
+        stage('Test') {
             steps {
-                script{
-                    env.CHECK_EXTERNAL_ID = 'deploy'}
-                echo "This is the build stage"
-                
-            }
-        }
-        stage('deploy') {
-            steps {
-                script{
-                    env.CHECK_EXTERNAL_ID = 'deploy'}
-                echo "This is the deploy stage"
-                
+                // Define the context for the status check
+                script {
+                    env.GITHUB_STATUS_CONTEXT = 'test'
+                }
+                // Run the test steps
+                echo 'make test'
             }
         }
     }
-    
+    post {
+        // Publish the status check to GitHub
+        success {
+            script {
+                githubSetCommitStatus context: env.GITHUB_STATUS_CONTEXT, state: 'SUCCESS', description: 'Build succeeded', targetUrl: env.BUILD_URL
+            }
+        }
+        failure {
+            script {
+                githubSetCommitStatus context: env.GITHUB_STATUS_CONTEXT, state: 'FAILURE', description: 'Build failed', targetUrl: env.BUILD_URL
+            }
+        }
+    }
 }
