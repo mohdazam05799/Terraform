@@ -8,9 +8,9 @@ pipeline {
                 script{
                    try {
                             build_command = sh(script: "pwd", returnStatus: true)
-                            check_runs.buildGithubCheck(<REPO_NAME>, <COMMIT_ID>, privateKey, 'success', "build")
+                            check_runs.buildGithubCheck("Terraform", , privateKey, 'success', "build")
                         } catch(Exception e) {
-                            check_runs.buildGithubCheck(<REPO_NAME>, <COMMIT_ID>, privateKey, 'failure', "build")
+                            check_runs.buildGithubCheck("Terraform", , privateKey, 'failure', "build")
                             echo "Exception: ${e}"
                         }
                 }
