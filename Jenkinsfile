@@ -3,36 +3,59 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                // Define the context for the status check
                 script {
-                    env.GITHUB_STATUS_CONTEXT = 'build'
+                    def check = buildGithubCheck name: 'Build', status: 'in_progress'
+                    try {
+                        echo 'make build'
+                        check = check.update(status: 'completed', conclusion: 'success', output: [title: 'Build', summary: 'Build successful'])
+                    } catch (e) {
+                        check = check.update(status: 'completed', conclusion: 'failure', output: [title: 'Error', summary: 'Error occurred during Build stage'])
+                        throw e
+                    } finally {
+                        env.CHECK_EXTERNAL_ID = 'Build'
+                        env.CHECK_CONCLUSION = check.conclusion
+                    }
                 }
-                // Run the build steps
-                echo 'make build'
             }
         }
         stage('Test') {
             steps {
-                // Define the context for the status check
                 script {
-                    env.GITHUB_STATUS_CONTEXT = 'test'
+                    def check = buildGithubCheck name: 'Test', status: 'in_progress'
+                    try {
+                        echo 'make test'
+                        check = check.update(status: 'completed', conclusion: 'success', output: [title: 'Test', summary: 'Test successful'])
+                    } catch (e) {
+                        check = check.update(status: 'completed', conclusion: 'failure', output: [title: 'Error', summary: 'Error occurred during Test stage'])
+                        throw e
+                    } finally {
+                        env.CHECK_EXTERNAL_ID = 'Test'
+                        env.CHECK_CONCLUSION = check.conclusion
+                    }
                 }
-                // Run the test steps
-                echo 'make test'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                script {
+                    def check = buildGithubCheck name: 'Deploy', status: 'in_progress'
+                    try {
+                        echo 'make deploy'
+                        check = check.update(status: 'completed', conclusion: 'success', output: [title: 'Deploy', summary: 'Deployment successful'])
+                    } catch (e) {
+                        check = check.update(status: 'completed', conclusion: 'failure', output: [title: 'Error', summary: 'Error occurred during Deploy stage'])
+                        throw e
+                    } finally {
+                        env.CHECK_EXTERNAL_ID = 'Deploy'
+                        env.CHECK_CONCLUSION = check.conclusion
+                    }
+                }
             }
         }
     }
     post {
-        // Publish the status check to GitHub
-        success {
-            script {
-                githubSetCommitStatus context: env.GITHUB_STATUS_CONTEXT, state: 'SUCCESS', description: 'Build succeeded', targetUrl: env.BUILD_URL
-            }
-        }
-        failure {
-            script {
-                githubSetCommitStatus context: env.GITHUB_STATUS_CONTEXT, state: 'FAILURE', description: 'Build failed', targetUrl: env.BUILD_URL
-            }
+        always {
+            buildGithubCheck name: env.CHECK_EXTERNAL_ID, status: 'completed', conclusion: env.CHECK_CONCLUSION, output: [title: env.CHECK_EXTERNAL_ID, summary: "${env.CHECK_EXTERNAL_ID} stage ${env.CHECK_CONCLUSION}"]
         }
     }
 }
