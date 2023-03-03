@@ -12,8 +12,9 @@ pipeline {
             }
             
             post{
+                always{
             
-            updatePrStatusLabels(stage.getStatus())
+                    updatePrStatusLabels(stage.getStatus())}
             }
            
         }
