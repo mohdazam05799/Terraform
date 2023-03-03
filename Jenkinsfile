@@ -32,25 +32,97 @@ pipeline {
     }
 }
 
-def updateCheck(stageName, status) {
-//     def github = credentials('github')
-//     def git = checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: github.id, url: 'https://github.com/your-org/your-repo.git']]])
-//     def sha = git.GIT_COMMIT
-    def githubApiUrl = "https://api.github.com/repos/mohdazam05799/Terraform/check-runs"
-    def checkName = "${stageName} (${env.BRANCH_NAME})"
-    def checkId = UUID.randomUUID().toString()
-    def payload = [
-        name: checkName,
-//         head_sha: sha,
-        status: status,
-        external_id: checkId,
-        started_at: new Date().format("yyyy-MM-dd'T'HH:mm:ss'Z'"),
-        output: [
-            title: checkName,
-            summary: "Check for ${stageName} on branch ${env.BRANCH_NAME}",
-            text: "Check for ${stageName} on branch ${env.BRANCH_NAME}"
-        ]
-    ]
-    sh "curl  -H 'Accept: application/vnd.github.antiope-preview+json' -d '${payload}' '${githubApiUrl}'"
+def getStatusContext(buildName) {
+    switch (buildName) {
+        case 'Build':       return 'pr-merge/build'
+        case 'Test':          return 'Test'
+        case 'Deploy':         return 'Deploy'
+    }
+
+    return ''
 }
 
+def updateStatus(buildName, newStatus, url = '', customDesc = '') {
+    if (!env.CHANGE_ID) return
+
+    // github handles only 3 statuses; other - just internal variations
+    def statusPending = 'pending'
+    def statusSuccess = 'success'
+    def statusFailure = 'failure'
+
+    if (url == '')
+        url = env.BUILD_URL
+
+    def context = getStatusContext(buildName)
+    if (!context) {
+        echo "Status: ${newStatus}: Unable to get Context for ${buildName}"
+        return
+    }
+
+    def description = ''
+    switch (newStatus) {
+        // special
+        case 'wait':
+            description = 'Automatic check suppressed, waiting for a command'
+            newStatus = statusPending
+            break
+        case 'skip':
+            description = '[SKIPPED]'
+            newStatus = statusSuccess
+            break
+        case 'repo failed':
+            description = 'Repo failed to pull with git!'
+            newStatus = statusFailure
+            break
+        case 'aborted':
+            description = '[ABORTED] due to unity build failure'
+            newStatus = statusFailure
+            break
+        case 'sanity failed':
+            description = '[FAILED] - sanity check failed'
+            newStatus = statusFailure
+            break
+        // triggered
+        case 'queued':
+            description = '[QUEUED]'
+            newStatus = statusPending
+            break
+        case statusPending:
+            description = '[PENDING]'
+            break
+        case 'running':
+            description = '[RUNNING]'
+            newStatus = statusPending
+            break
+
+        // finished
+        case statusSuccess:
+            description = '[SUCCEEDED]'
+            break
+        case statusFailure:
+            description = '[FAILED]'
+            break
+    }
+
+    if (customDesc) description = customDesc
+
+    echo "New Status: ${context} -> ${description}"
+
+    pullRequest.createStatus(newStatus, context, description.take(120), url)
+
+    if ((newStatus == statusFailure) && isAbortOnFailure(buildName) 
+        /* last condition to be removed if other builds will have this option */ ) {
+        currentBuild.result = 'FAILURE'
+        error("${buildName} is failed, stopping build because abortOnFailure is active")
+    }
+}
+
+def updatePrStatusLabels(newStatus, targetNode, subtarget = '') {
+    def builds = ['Build', 'Test', 'Deploy']
+    for (buildName in builds)
+        updateStatus(buildName, newStatus)
+
+    
+
+    
+}
