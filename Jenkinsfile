@@ -6,7 +6,7 @@ pipeline {
             steps {
                 echo "Building..."
                 
-                updatePrStatusLabels('Build')
+                updatePrStatusLabels('wait')
                 
                 
             }
