@@ -5,6 +5,9 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building..."
+                try{
+                updatePrStatusLabels('Build')
+                }
                 
             }
         }
@@ -108,7 +111,7 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
     }
 }
 
-def updatePrStatusLabels(newStatus, targetNode, subtarget = '') {
+def updatePrStatusLabels(newStatus) {
     def builds = ['Build', 'Test', 'Deploy']
     for (buildName in builds)
         updateStatus(buildName, newStatus)
