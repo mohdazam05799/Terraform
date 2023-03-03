@@ -14,7 +14,7 @@ pipeline {
             post{
                 always{
             
-                    updatePrStatusLabels(currentBuild.result)}
+                    updatePrStatusLabels((currentBuild.result).toLowerCase())}
             }
            
         }
