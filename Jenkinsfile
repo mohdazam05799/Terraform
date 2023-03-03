@@ -6,7 +6,7 @@ pipeline {
             steps {
                 echo "Building..."
                 
-                updatePrStatusLabels('Build')
+                updatePrStatusLabels("Build")
                 
                 
             }
@@ -28,9 +28,9 @@ pipeline {
 
 def getStatusContext(buildName) {
     switch (buildName) {
-        case 'Build':       return 'pr-merge/build'
-        case 'Test':          return 'Test'
-        case 'Deploy':         return 'Deploy'
+        case 'Build':       return "build"
+        case 'Test':          return "Test"
+        case 'Deploy':         return "Deploy"
     }
 
     return ''
@@ -103,8 +103,6 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
 }
 
 def updatePrStatusLabels(newStatus) {
-    def builds = ['Build', 'Test', 'Deploy']
-    for (buildName in builds)
         updateStatus(buildName, newStatus)
 
     
