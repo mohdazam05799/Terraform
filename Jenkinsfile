@@ -37,7 +37,6 @@ def getStatusContext(buildName) {
 }
 
 def updateStatus(buildName, newStatus, url = '', customDesc = '') {
-    if (!env.CHANGE_ID) return
 
     // github handles only 3 statuses; other - just internal variations
     def statusPending = 'pending'
@@ -98,17 +97,9 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
             break
     }
 
-    if (customDesc) description = customDesc
 
-    echo "New Status: ${context} -> ${description}"
+    pullRequest.createStatus(newStatus, context, description.take(120), url)
 
-//     pullRequest.createStatus(newStatus, context, description.take(120), url)
-
-    if ((newStatus == statusFailure) && isAbortOnFailure(buildName) 
-        /* last condition to be removed if other builds will have this option */ ) {
-        currentBuild.result = 'FAILURE'
-        error("${buildName} is failed, stopping build because abortOnFailure is active")
-    }
 }
 
 def updatePrStatusLabels(newStatus) {
