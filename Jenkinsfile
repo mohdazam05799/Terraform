@@ -102,7 +102,7 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
 
     echo "New Status: ${context} -> ${description}"
 
-    pullRequest.createStatus(newStatus, context, description.take(120), url)
+//     pullRequest.createStatus(newStatus, context, description.take(120), url)
 
     if ((newStatus == statusFailure) && isAbortOnFailure(buildName) 
         /* last condition to be removed if other builds will have this option */ ) {
