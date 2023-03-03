@@ -60,51 +60,6 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
         return
     }
 
-    def description = ''
-    switch (newStatus) {
-        // special
-        case 'wait':
-            description = 'Automatic check suppressed, waiting for a command'
-            newStatus = statusPending
-            break
-        case 'skip':
-            description = '[SKIPPED]'
-            newStatus = statusSuccess
-            break
-        case 'repo failed':
-            description = 'Repo failed to pull with git!'
-            newStatus = statusFailure
-            break
-        case 'aborted':
-            description = '[ABORTED] due to unity build failure'
-            newStatus = statusFailure
-            break
-        case 'sanity failed':
-            description = '[FAILED] - sanity check failed'
-            newStatus = statusFailure
-            break
-        // triggered
-        case 'queued':
-            description = '[QUEUED]'
-            newStatus = statusPending
-            break
-        case statusPending:
-            description = '[PENDING]'
-            break
-        case 'running':
-            description = '[RUNNING]'
-            newStatus = statusPending
-            break
-
-        // finished
-        case statusSuccess:
-            description = '[SUCCEEDED]'
-            break
-        case statusFailure:
-            description = '[FAILED]'
-            break
-    }
-
 
     pullRequest.createStatus(newStatus, context, description.take(120), url)
 
