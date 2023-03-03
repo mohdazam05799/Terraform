@@ -6,11 +6,18 @@ pipeline {
             steps {
                 echo "Building..."
                 
-                updatePrStatusLabels('wait')
+                
                 
                 
             }
+            
+            post{
+            
+            updatePrStatusLabels(stage.getStatus())
+            }
+           
         }
+        
         stage('Test') {
             steps {
                 echo "Testing..."
