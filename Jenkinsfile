@@ -1,66 +1,67 @@
-@Library('github.com/jenkinsci/github-branch-source-plugin@master')
-import org.jenkinsci.plugins.github_branch_source.GitHubStatusNotification
-
 pipeline {
     agent any
-
     stages {
         stage('Build') {
             steps {
-                echo 'Running Build stage'
+                echo "Running Build Stage"
+                // Your build steps here
             }
             post {
-                success {
-                    script {
-                        def status = new GitHubStatusNotification()
-                        status.updateGitHubStatus(
-                            context: 'Jenkins Pipeline - Build',
-                            state: 'SUCCESS',
-                            message: 'Build stage completed successfully',
-                            url: env.BUILD_URL,
-                            sha: env.GIT_COMMIT
-                        )
-                    }
+                always {
+                    updateGitHubCheck('Build')
                 }
             }
         }
         stage('Test') {
             steps {
-                echo 'Running Test stage'
+                echo "Running Test Stage"
+                // Your test steps here
             }
             post {
-                success {
-                    script {
-                        def status = new GitHubStatusNotification()
-                        status.updateGitHubStatus(
-                            context: 'Jenkins Pipeline - Test',
-                            state: 'SUCCESS',
-                            message: 'Test stage completed successfully',
-                            url: env.BUILD_URL,
-                            sha: env.GIT_COMMIT
-                        )
-                    }
+                always {
+                    updateGitHubCheck('Test')
                 }
             }
         }
         stage('Deploy') {
             steps {
-                echo 'Running Deploy stage'
+                echo "Running Deploy Stage"
+                // Your deploy steps here
             }
             post {
-                success {
-                    script {
-                        def status = new GitHubStatusNotification()
-                        status.updateGitHubStatus(
-                            context: 'Jenkins Pipeline - Deploy',
-                            state: 'SUCCESS',
-                            message: 'Deploy stage completed successfully',
-                            url: env.BUILD_URL,
-                            sha: env.GIT_COMMIT
-                        )
-                    }
+                always {
+                    updateGitHubCheck('Deploy')
                 }
             }
         }
     }
+}
+
+def updateGitHubCheck(String stageName) {
+    def github = credentials('github')
+    //def git = checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: github.id, url: 'https://github.com/your-org/your-repo.git']]])
+    def sha = git.GIT_COMMIT
+    def githubApiUrl = "https://api.github.com/repos/mohdazam05799/Terraform/check-runs"
+    def payload = """
+        {
+            "name": "Your Check Name",
+            "head_sha": "${sha}",
+            "status": "completed",
+            "conclusion": "success",
+            "output": {
+                "title": "Your Check Title",
+                "summary": "Your Check Summary",
+                "text": "${stageName} Stage completed successfully"
+            }
+        }
+    """
+    def response = httpRequest(
+        acceptType: 'APPLICATION_JSON',
+        contentType: 'APPLICATION_JSON',
+        httpMode: 'POST',
+        url: githubApiUrl,
+        requestBody: payload,
+        authentication: github
+    )
+    echo "Response status: ${response.status}"
 }
