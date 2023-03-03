@@ -98,7 +98,7 @@ def updateStatus(buildName, newStatus, url = '', customDesc = '') {
     }
 
 
-    setGitHubPullRequestStatus(context,newStatus,state)
+    setGitHubPullRequestStatus(context,newStatus)
 
 }
 
