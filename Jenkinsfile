@@ -1,23 +1,63 @@
-node {
-    stage('Stage 1') {
-        echo 'This is Stage 1'
-        githubNotify(
-            status: 'success',
-            message: 'Stage 1 passed'
-        )
-    }
-    stage('Stage 2') {
-        echo 'This is Stage 2'
-        githubNotify(
-            status: 'failure',
-            message: 'Stage 2 failed'
-        )
-    }
-    stage('Stage 3') {
-        echo 'This is Stage 3'
-        githubNotify(
-            status: 'success',
-            message: 'Stage 3 passed'
-        )
+pipeline {
+    agent any
+
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Running Build stage'
+            }
+            post {
+                success {
+                    script {
+                        def status = new GitHubStatusNotification()
+                        status.updateGitHubStatus(
+                            context: 'Jenkins Pipeline - Build',
+                            state: 'SUCCESS',
+                            message: 'Build stage completed successfully',
+                            url: env.BUILD_URL,
+                            sha: env.GIT_COMMIT
+                        )
+                    }
+                }
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Running Test stage'
+            }
+            post {
+                success {
+                    script {
+                        def status = new GitHubStatusNotification()
+                        status.updateGitHubStatus(
+                            context: 'Jenkins Pipeline - Test',
+                            state: 'SUCCESS',
+                            message: 'Test stage completed successfully',
+                            url: env.BUILD_URL,
+                            sha: env.GIT_COMMIT
+                        )
+                    }
+                }
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Running Deploy stage'
+            }
+            post {
+                success {
+                    script {
+                        def status = new GitHubStatusNotification()
+                        status.updateGitHubStatus(
+                            context: 'Jenkins Pipeline - Deploy',
+                            state: 'SUCCESS',
+                            message: 'Deploy stage completed successfully',
+                            url: env.BUILD_URL,
+                            sha: env.GIT_COMMIT
+                        )
+                    }
+                }
+            }
+        }
     }
 }
