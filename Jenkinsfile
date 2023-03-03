@@ -5,28 +5,19 @@ pipeline {
         stage('Build') {
             steps {
                 echo "Building..."
-                script {
-                    updateCheck("Build", "in_progress")
-                    // Build steps here
-                }
+                
             }
         }
         stage('Test') {
             steps {
                 echo "Testing..."
-                script {
-                    updateCheck("Test", "in_progress")
-                    // Test steps here
-                }
+                
             }
         }
         stage('Deploy') {
             steps {
                 echo "Deploying..."
-                script {
-                    updateCheck("Deploy", "in_progress")
-                    // Deploy steps here
-                }
+                
             }
         }
     }
