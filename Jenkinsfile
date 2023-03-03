@@ -1,3 +1,6 @@
+@Library('github.com/jenkinsci/github-branch-source-plugin@master')
+import org.jenkinsci.plugins.github_branch_source.GitHubStatusNotification
+
 pipeline {
     agent any
 
