@@ -38,7 +38,7 @@ pipeline {
 }
 
 def updateGitHubCheck(String stageName) {
-    def github = credentials('github')
+//     def github = credentials('github')
     //def git = checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'src']], userRemoteConfigs: [[credentialsId: github.id, url: 'https://github.com/your-org/your-repo.git']]])
    // def sha = git.GIT_COMMIT
     def githubApiUrl = "https://api.github.com/repos/mohdazam05799/Terraform/check-runs"
